@@ -6,8 +6,7 @@ sealed class AppUserState {}
 final class AppUserInitial extends AppUserState {}
 
 final class AppUserLoggedIn extends AppUserState {
-  //final
-}
+  final User user;
 
-//core cannot depend on other features
-//other features can depend on core
+  AppUserLoggedIn(this.user);
+}
