@@ -13,6 +13,12 @@ class AppTheme {
     appBarTheme: const AppBarTheme(
       backgroundColor: AppPallete.borderColor,
     ),
+    chipTheme: const ChipThemeData(
+      color: WidgetStatePropertyAll(
+        AppPallete.backgroundColor,
+      ),
+      side: BorderSide.none,
+    ),
     inputDecorationTheme: InputDecorationTheme(
         contentPadding: const EdgeInsets.all(28),
         enabledBorder: _border(),
