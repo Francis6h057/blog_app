@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:blog_app/core/theme/app_pallete.dart';
+import 'package:blog_app/core/utils/pick_image.dart';
 import 'package:blog_app/features/blog/presentation/widgets/blog_editor.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
@@ -23,6 +26,17 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
   final blogContentController = TextEditingController();
 
   List<String> selectedTopics = [];
+  File? image;
+
+  void selectImage() async {
+    final pickedImage = await pickImage();
+
+    if (pickedImage != null) {
+      setState(() {
+        image = pickedImage;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -81,33 +95,53 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Dotted border for image selection placeholder
-                        DottedBorder(
-                          strokeWidth: 3,
-                          strokeCap: StrokeCap.round,
-                          color: AppPallete.borderColor,
-                          dashPattern: const [18, 9],
-                          radius: const Radius.circular(16),
-                          borderType: BorderType.RRect,
-                          child: const SizedBox(
-                            height: 120,
-                            width: double.infinity,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.folder_open_rounded,
-                                  size: 46,
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  'Select your blog image',
-                                  style: TextStyle(fontSize: 18),
-                                )
-                              ],
-                            ),
-                          ),
+                        const SizedBox(
+                          height: 24,
                         ),
+                        image != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: GestureDetector(
+                                  onTap: selectImage,
+                                  child: Image.file(
+                                    image!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              )
+                            // Dotted border for image selection placeholder
+                            : GestureDetector(
+                                onTap: () {
+                                  selectImage();
+                                },
+                                child: DottedBorder(
+                                  strokeWidth: 3,
+                                  strokeCap: StrokeCap.round,
+                                  color: AppPallete.borderColor,
+                                  dashPattern: const [18, 9],
+                                  radius: const Radius.circular(16),
+                                  borderType: BorderType.RRect,
+                                  child: const SizedBox(
+                                    height: 120,
+                                    width: double.infinity,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.folder_open_rounded,
+                                          size: 46,
+                                        ),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          'Select your blog image',
+                                          style: TextStyle(fontSize: 18),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
 
                         const SizedBox(height: 10),
 
