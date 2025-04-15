@@ -24,7 +24,7 @@ class AppTheme {
       enabledBorder: _border(),
       errorBorder: _border(AppPallete.errorColor),
       focusedBorder: _border(AppPallete.gradient2),
-      focusedErrorBorder: _border(AppPallete.errorColor),
+      border: _border(),
     ),
   );
 }
