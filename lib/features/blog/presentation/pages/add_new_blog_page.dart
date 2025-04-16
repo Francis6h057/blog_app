@@ -13,9 +13,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Main page for adding a new blog
+/// Page for composing and uploading a new blog post
 class AddNewBlogPage extends StatefulWidget {
-  // Route helper for navigation
+  /// Route helper method for navigation
   static route() => MaterialPageRoute(
         builder: (context) => const AddNewBlogPage(),
       );
@@ -27,31 +27,20 @@ class AddNewBlogPage extends StatefulWidget {
 }
 
 class _AddNewBlogPageState extends State<AddNewBlogPage> {
-  // Controllers to manage input for blog title and content
+  // Controllers for blog title and content input
   final blogTitleController = TextEditingController();
   final blogContentController = TextEditingController();
 
+  // Form key for validation
   final formKey = GlobalKey<FormState>();
 
+  // Selected topics for the blog post
   List<String> selectedTopics = [];
+
+  // Blog image file
   File? image;
 
-  void uploadBlog() {
-    if (formKey.currentState!.validate() &&
-        selectedTopics.isNotEmpty &&
-        image != null) {
-      final posterId =
-          (context.read<AppUserCubit>().state as AppUserLoggedIn).user.id;
-      context.read<BlogBloc>().add(BlogUpload(
-            posterId: posterId,
-            title: blogTitleController.text.trim(),
-            content: blogContentController.text.trim(),
-            image: image!,
-            topics: selectedTopics,
-          ));
-    }
-  }
-
+  /// Function to trigger image selection from gallery
   void selectImage() async {
     final pickedImage = await pickImage();
 
@@ -62,9 +51,37 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
     }
   }
 
+  /// Function to validate and dispatch the blog upload event
+  void uploadBlog() {
+    // Run form validation
+    if (formKey.currentState!.validate()) {
+      if (selectedTopics.isEmpty) {
+        showSnackBar(context, 'Please select at least one topic');
+        return;
+      }
+
+      if (image == null) {
+        showSnackBar(context, 'Please select an image');
+        return;
+      }
+
+      final posterId =
+          (context.read<AppUserCubit>().state as AppUserLoggedIn).user.id;
+
+      // Dispatch the blog upload event to Bloc
+      context.read<BlogBloc>().add(BlogUpload(
+            posterId: posterId,
+            title: blogTitleController.text.trim(),
+            content: blogContentController.text.trim(),
+            image: image!,
+            topics: selectedTopics,
+          ));
+    }
+  }
+
   @override
   void dispose() {
-    // Clean up controllers when widget is disposed
+    // Clean up text controllers when the widget is disposed
     blogContentController.dispose();
     blogTitleController.dispose();
     super.dispose();
@@ -73,18 +90,16 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Automatically adjust the layout when the keyboard is shown
+      // Allow resizing when the keyboard is shown
       resizeToAvoidBottomInset: true,
 
       // App bar for the page
       appBar: AppBar(
-        title: const Center(
-          child: Text('New Blog'),
-        ),
+        title: const Center(child: Text('New Blog')),
         backgroundColor: AppPallete.transparentColor,
         surfaceTintColor: AppPallete.transparentColor,
         actions: [
-          // Placeholder action icon (e.g. to submit blog later)
+          // Upload button (checkmark icon)
           IconButton(
             onPressed: uploadBlog,
             icon: const Icon(CupertinoIcons.check_mark_circled),
@@ -92,15 +107,13 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
         ],
       ),
 
-      // Page body
+      // Main body of the page
       body: SafeArea(
-        // Dismiss keyboard when tapping outside input
         child: GestureDetector(
           onTap: () {
+            // Dismiss keyboard when tapping outside input
             FocusScope.of(context).unfocus();
           },
-
-          // LayoutBuilder used to get constraints for dynamic sizing
           child: LayoutBuilder(
             builder: (context, constraints) {
               return BlocConsumer<BlogBloc, BlogState>(
@@ -108,6 +121,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                   if (state is BlogFailure) {
                     showSnackBar(context, state.error);
                   } else if (state is BlogUploadSuccess) {
+                    // Navigate to blog list page after successful upload
                     Navigator.pushAndRemoveUntil(
                       context,
                       BlogPage.route(),
@@ -117,30 +131,25 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                 },
                 builder: (context, state) {
                   if (state is BlogLoading) {
+                    // Show loading spinner during upload
                     return const Loader();
                   }
+
                   return SingleChildScrollView(
-                    // Add padding around content
                     padding: const EdgeInsets.all(16),
-
-                    // Reverses scroll direction so bottom stays visible with keyboard
-                    reverse: true,
-
+                    reverse: true, // Keep scroll view pinned to bottom
                     child: ConstrainedBox(
-                      // Makes sure the scroll view takes at least the full screen height
                       constraints:
                           BoxConstraints(minHeight: constraints.maxHeight),
-
                       child: IntrinsicHeight(
-                        // Ensures the column takes only needed vertical space
                         child: Form(
                           key: formKey,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const SizedBox(
-                                height: 24,
-                              ),
+                              const SizedBox(height: 24),
+
+                              // Image preview or upload placeholder
                               image != null
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
@@ -152,11 +161,8 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                                         ),
                                       ),
                                     )
-                                  // Dotted border for image selection placeholder
                                   : GestureDetector(
-                                      onTap: () {
-                                        selectImage();
-                                      },
+                                      onTap: selectImage,
                                       child: DottedBorder(
                                         strokeWidth: 3,
                                         strokeCap: StrokeCap.round,
@@ -171,10 +177,8 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
                                             children: [
-                                              Icon(
-                                                Icons.folder_open_rounded,
-                                                size: 46,
-                                              ),
+                                              Icon(Icons.folder_open_rounded,
+                                                  size: 46),
                                               SizedBox(height: 10),
                                               Text(
                                                 'Select your blog image',
@@ -188,7 +192,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
 
                               const SizedBox(height: 10),
 
-                              // Horizontal scrolling list of category chips
+                              // Horizontal list of topic chips
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
@@ -196,44 +200,43 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                                     'Technology',
                                     'Business',
                                     'Programming',
-                                    'Entertainment'
+                                    'Entertainment',
                                   ]
-                                      .map((e) => Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                if (selectedTopics
-                                                    .contains(e)) {
-                                                  selectedTopics.remove(e);
-                                                } else {
-                                                  selectedTopics.add(e);
-                                                }
-                                                setState(() {});
-                                              },
-                                              child: Chip(
-                                                label: Text(e),
-                                                color: selectedTopics
-                                                        .contains(e)
-                                                    ? const WidgetStatePropertyAll(
-                                                        AppPallete.gradient1,
-                                                      )
-                                                    : null,
-                                                side: selectedTopics.contains(e)
-                                                    ? null
-                                                    : const BorderSide(
-                                                        color: AppPallete
-                                                            .borderColor,
-                                                      ),
-                                              ),
+                                      .map(
+                                        (e) => Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              // Toggle topic selection
+                                              if (selectedTopics.contains(e)) {
+                                                selectedTopics.remove(e);
+                                              } else {
+                                                selectedTopics.add(e);
+                                              }
+                                              setState(() {});
+                                            },
+                                            child: Chip(
+                                              label: Text(e),
+                                              color: selectedTopics.contains(e)
+                                                  ? const WidgetStatePropertyAll(
+                                                      AppPallete.gradient1)
+                                                  : null,
+                                              side: selectedTopics.contains(e)
+                                                  ? null
+                                                  : const BorderSide(
+                                                      color: AppPallete
+                                                          .borderColor),
                                             ),
-                                          ))
+                                          ),
+                                        ),
+                                      )
                                       .toList(),
                                 ),
                               ),
 
                               const SizedBox(height: 10),
 
-                              // Text field for blog title
+                              // Blog title input
                               BlogEditor(
                                 controller: blogTitleController,
                                 hintText: 'Blog Title',
@@ -241,7 +244,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
 
                               const SizedBox(height: 10),
 
-                              // Text field for blog content
+                              // Blog content input
                               BlogEditor(
                                 controller: blogContentController,
                                 hintText: 'Blog Content',
@@ -250,7 +253,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
 
                               const Spacer(),
 
-                              // Extra space to push content above the keyboard when open
+                              // Add spacing to prevent keyboard overlap
                               SizedBox(
                                 height:
                                     MediaQuery.of(context).viewInsets.bottom,

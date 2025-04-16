@@ -1,17 +1,20 @@
-import 'package:blog_app/core/common/widgets/loader.dart';
-import 'package:blog_app/core/theme/app_pallete.dart';
-import 'package:blog_app/core/utils/show_snackbar.dart';
-import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:blog_app/features/auth/presentation/pages/login_page.dart';
-import 'package:blog_app/features/auth/presentation/widgets/auth_field.dart';
-import 'package:blog_app/features/auth/presentation/widgets/auth_gradient_button.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:blog_app/core/common/widgets/loader.dart'; // Custom loader widget
+import 'package:blog_app/core/theme/app_pallete.dart'; // Color palette for the app
+import 'package:blog_app/core/utils/show_snackbar.dart'; // Utility function to show snackbar messages
+import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart'; // Bloc for managing authentication state
+import 'package:blog_app/features/auth/presentation/pages/login_page.dart'; // Login page
+import 'package:blog_app/features/auth/presentation/widgets/auth_field.dart'; // Custom text field widget for authentication
+import 'package:blog_app/features/auth/presentation/widgets/auth_gradient_button.dart'; // Custom gradient button widget for authentication
+import 'package:flutter/material.dart'; // Flutter Material package
+import 'package:flutter_bloc/flutter_bloc.dart'; // Flutter Bloc package for state management
 
+// SignupPage widget for creating a new user account
 class SignupPage extends StatefulWidget {
+  // Route method for navigation to the LoginPage
   static route() => MaterialPageRoute(
         builder: (context) => const LoginPage(),
       );
+  // Constructor for SignupPage
   const SignupPage({super.key});
 
   @override
@@ -19,11 +22,15 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  // Controllers for the name, email, and password text fields
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  // GlobalKey for form validation
   final formKey = GlobalKey<FormState>();
 
+  // Dispose method to clean up controllers
   @override
   void dispose() {
     nameController.dispose();
@@ -32,55 +39,64 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
+  // Build method for the widget
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: BlocConsumer<AuthBloc, AuthState>(
+          // Listener for authentication state changes
           listener: (context, state) {
             if (state is AuthFailure) {
+              // Show failure message in Snackbar if authentication fails
               showSnackBar(
                 context,
                 state.message,
               );
             }
           },
+          // Builder to display the widget based on the current authentication state
           builder: (context, state) {
             if (state is AuthLoading) {
+              // Show loading indicator if authentication is in progress
               return const Loader();
             }
+
             return Form(
-              key: formKey,
+              key: formKey, // FormKey for validating form fields
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
+                  // Title: Sign Up
                   const Center(
                       child: Text(
                     "Sign Up.",
                     style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
                   )),
-                  // const SizedBox(height: 36),
+                  // Custom name text field
                   AuthField(
                     hintText: "Name",
                     controller: nameController,
                   ),
-                  //const SizedBox(height: 18),
+                  // Custom email text field
                   AuthField(
                     hintText: "Email",
                     controller: emailController,
                   ),
-                  // const SizedBox(height: 18),
+                  // Custom password text field
                   AuthField(
                     hintText: "Password",
                     controller: passwordController,
-                    obscureText: true,
+                    obscureText: true, // Hide password input
                   ),
-                  // const SizedBox(height: 24),
+                  // Custom gradient sign-up button
                   AuthGradientButton(
                     text: "Sign Up",
                     onPressed: () {
+                      // Validate form before proceeding
                       if (formKey.currentState!.validate()) {
+                        // Dispatch AuthSignUp event with the provided name, email, and password
                         context.read<AuthBloc>().add(
                               AuthSignUp(
                                 name: nameController.text.trim(),
@@ -91,7 +107,7 @@ class _SignupPageState extends State<SignupPage> {
                       }
                     },
                   ),
-                  // const SizedBox(height: 10),
+                  // Gesture to navigate to the Login page if the user already has an account
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
