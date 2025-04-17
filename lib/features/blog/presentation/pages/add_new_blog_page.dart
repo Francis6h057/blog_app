@@ -96,8 +96,6 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
       // App bar for the page
       appBar: AppBar(
         title: const Center(child: Text('New Blog')),
-        backgroundColor: AppPallete.transparentColor,
-        surfaceTintColor: AppPallete.transparentColor,
         actions: [
           // Upload button (checkmark icon)
           IconButton(

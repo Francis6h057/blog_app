@@ -9,6 +9,7 @@ Future<File?> pickImage() async {
     final xFile = await ImagePicker().pickImage(
       // The source of the image is the gallery.
       source: ImageSource.gallery,
+      //imageQuality: 10
     );
 
     // Check if an image was picked (xFile is not null).

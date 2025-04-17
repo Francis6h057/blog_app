@@ -23,7 +23,8 @@ class AppTheme {
 
     // Customizing the app bar theme to have a background color from AppPallete.
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppPallete.borderColor,
+      backgroundColor: AppPallete.transparentColor,
+      surfaceTintColor: AppPallete.transparentColor,
     ),
 
     // Customizing the chip theme to use the background color from AppPallete.
