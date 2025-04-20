@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:blog_app/core/error/exceptions.dart'; // Custom exception class
 import 'package:blog_app/core/error/failures.dart'; // Custom failure class
+import 'package:blog_app/core/network/connection_checker.dart';
+import 'package:blog_app/features/blog/data/datasources/blog_local_data_source.dart';
 import 'package:blog_app/features/blog/data/datasources/blog_remote_data_source.dart'; // Data source to handle remote blog data
 import 'package:blog_app/features/blog/data/models/blog_model.dart'; // Model class to represent a Blog
 import 'package:blog_app/features/blog/domain/entities/blog.dart'; // Entity class representing the Blog domain entity
@@ -15,8 +17,16 @@ class BlogRepositoryImpl implements BlogRepository {
   // Instance of the BlogRemoteDataSource, used for making remote calls related to blog data.
   final BlogRemoteDataSource blogRemoteDataSource;
 
+  final BlogLocalDataSource blogLocalDataSource;
+
+  final ConnectionChecker connectionChecker;
+
   // Constructor initializing the blogRemoteDataSource.
-  BlogRepositoryImpl(this.blogRemoteDataSource);
+  BlogRepositoryImpl(
+    this.blogRemoteDataSource,
+    this.blogLocalDataSource,
+    this.connectionChecker,
+  );
 
   // Overriding the method to upload a new blog post
   @override
@@ -29,6 +39,9 @@ class BlogRepositoryImpl implements BlogRepository {
         topics, // List of topics associated with the blog post
   }) async {
     try {
+      if (!await (connectionChecker.isConnected)) {
+        return left(Failure('No internet connection'));
+      }
       // Creating a new BlogModel instance with the given data.
       BlogModel blogModel = BlogModel(
         id: const Uuid().v1(), // Generates a unique ID for the blog post.
@@ -68,8 +81,15 @@ class BlogRepositoryImpl implements BlogRepository {
   @override
   Future<Either<Failure, List<Blog>>> getAllBlogs() async {
     try {
+      if (!await (connectionChecker.isConnected)) {
+        final blogs = blogLocalDataSource.loadBlogs();
+        return right(blogs);
+      }
+
       // Fetching all blogs from the remote data source
       final blogs = await blogRemoteDataSource.getAllBlogs();
+
+      blogLocalDataSource.uploadLocalBlogs(blogs: blogs);
 
       // Returning the list of blogs wrapped in a right side of the Either
       return right(blogs);

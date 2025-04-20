@@ -1,5 +1,6 @@
 // Importing the Cubit that manages the app user's state (e.g., logged in or not)
 import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:blog_app/core/network/connection_checker.dart';
 
 // Importing secret credentials (like Supabase keys and URLs)
 import 'package:blog_app/core/secrets/app_secrets.dart';
@@ -16,6 +17,7 @@ import 'package:blog_app/features/auth/domain/usecases/user_sign_up.dart';
 
 // Auth feature imports - presentation layer (Bloc)
 import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:blog_app/features/blog/data/datasources/blog_local_data_source.dart';
 
 // Blog feature imports - data layer
 import 'package:blog_app/features/blog/data/datasources/blog_remote_data_source.dart';
@@ -27,6 +29,9 @@ import 'package:blog_app/features/blog/domain/usecases/get_all_blogs.dart';
 
 // Dependency injection package (service locator)
 import 'package:get_it/get_it.dart';
+import 'package:hive/hive.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 // Supabase package for backend operations
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -53,13 +58,29 @@ Future<void> initDependencies() async {
     // debug: true,                      // Optional: enable debug mode
   );
 
+  Hive.defaultDirectory = (await getApplicationDocumentsDirectory()).path;
+
   // Register the Supabase client as a singleton so it can be reused
   serviceLocator.registerLazySingleton(
     () => supabase.client,
   );
 
+  serviceLocator.registerLazySingleton(() => Hive.box(name: 'blogs'));
+
+  serviceLocator.registerFactory(
+    () => InternetConnection(),
+  );
+
   // Register the AppUserCubit (manages auth state across the app)
-  serviceLocator.registerLazySingleton(() => AppUserCubit());
+  serviceLocator.registerLazySingleton(
+    () => AppUserCubit(),
+  );
+
+  serviceLocator.registerFactory<ConnectionChecker>(
+    () => ConnectionCheckerImpl(
+      serviceLocator(),
+    ),
+  );
 }
 
 // Private method to register authentication-related dependencies
@@ -75,6 +96,7 @@ void _initAuth() {
     ..registerFactory<AuthRepository>(
       () => AuthRepositoryImpl(
         serviceLocator(), // Injecting AuthRemoteDataSource
+        serviceLocator(),
       ),
     )
     // Register use case for signing up a user
@@ -115,9 +137,16 @@ void _initBlog() {
         supabaseClient: serviceLocator(), // Inject Supabase client
       ),
     )
+    ..registerFactory<BlogLocalDataSource>(
+      () => BlogLocalDataSourceImpl(
+        serviceLocator(),
+      ),
+    )
     // Register the blog repository
     ..registerFactory<BlogRepository>(
       () => BlogRepositoryImpl(
+        serviceLocator(),
+        serviceLocator(),
         serviceLocator(), // Inject BlogRemoteDataSource
       ),
     )
