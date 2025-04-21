@@ -107,153 +107,138 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
 
       // Main body of the page
       body: SafeArea(
-        child: GestureDetector(
-          onTap: () {
-            // Dismiss keyboard when tapping outside input
-            FocusScope.of(context).unfocus();
+        child: BlocConsumer<BlogBloc, BlogState>(
+          listener: (context, state) {
+            if (state is BlogFailure) {
+              showSnackBar(context, state.error);
+            } else if (state is BlogUploadSuccess) {
+              // Navigate to blog list page after successful upload
+              Navigator.pushAndRemoveUntil(
+                context,
+                BlogPage.route(),
+                (route) => false,
+              );
+            }
           },
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return BlocConsumer<BlogBloc, BlogState>(
-                listener: (context, state) {
-                  if (state is BlogFailure) {
-                    showSnackBar(context, state.error);
-                  } else if (state is BlogUploadSuccess) {
-                    // Navigate to blog list page after successful upload
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      BlogPage.route(),
-                      (route) => false,
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  if (state is BlogLoading) {
-                    // Show loading spinner during upload
-                    return const Loader();
-                  }
+          builder: (context, state) {
+            if (state is BlogLoading) {
+              // Show loading spinner during upload
+              return const Loader();
+            }
 
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    reverse: true, // Keep scroll view pinned to bottom
-                    child: Form(
-                      key: formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: 24),
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              reverse: true, // Keep scroll view pinned to bottom
+              child: Form(
+                key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 24),
 
-                          // Image preview or upload placeholder
-                          image != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: GestureDetector(
-                                    onTap: selectImage,
-                                    child: Image.file(
-                                      image!,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                )
-                              : GestureDetector(
-                                  onTap: selectImage,
-                                  child: DottedBorder(
-                                    strokeWidth: 3,
-                                    strokeCap: StrokeCap.round,
-                                    color: AppPallete.borderColor,
-                                    dashPattern: const [18, 9],
-                                    radius: const Radius.circular(16),
-                                    borderType: BorderType.RRect,
-                                    child: const SizedBox(
-                                      height: 120,
-                                      width: double.infinity,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.folder_open_rounded,
-                                              size: 46),
-                                          SizedBox(height: 10),
-                                          Text(
-                                            'Select your blog image',
-                                            style: TextStyle(fontSize: 18),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                    // Image preview or upload placeholder
+                    image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: GestureDetector(
+                              onTap: selectImage,
+                              child: Image.file(
+                                image!,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: selectImage,
+                            child: DottedBorder(
+                              strokeWidth: 3,
+                              strokeCap: StrokeCap.round,
+                              color: AppPallete.borderColor,
+                              dashPattern: const [18, 9],
+                              radius: const Radius.circular(16),
+                              borderType: BorderType.RRect,
+                              child: const SizedBox(
+                                height: 120,
+                                width: double.infinity,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.folder_open_rounded, size: 46),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      'Select your blog image',
+                                      style: TextStyle(fontSize: 18),
+                                    )
+                                  ],
                                 ),
-
-                          const SizedBox(height: 10),
-
-                          // Horizontal list of topic chips
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                'Technology',
-                                'Business',
-                                'Programming',
-                                'Entertainment',
-                              ]
-                                  .map(
-                                    (e) => Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          // Toggle topic selection
-                                          if (selectedTopics.contains(e)) {
-                                            selectedTopics.remove(e);
-                                          } else {
-                                            selectedTopics.add(e);
-                                          }
-                                          setState(() {});
-                                        },
-                                        child: Chip(
-                                          label: Text(e),
-                                          color: selectedTopics.contains(e)
-                                              ? const WidgetStatePropertyAll(
-                                                  AppPallete.gradient1)
-                                              : null,
-                                          side: selectedTopics.contains(e)
-                                              ? null
-                                              : const BorderSide(
-                                                  color:
-                                                      AppPallete.borderColor),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
+                              ),
                             ),
                           ),
 
-                          const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                          // Blog title input
-                          BlogEditor(
-                            controller: blogTitleController,
-                            hintText: 'Blog Title',
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          // Blog content input
-                          BlogEditor(
-                            controller: blogContentController,
-                            hintText: 'Blog Content',
-                            minLength: 4,
-                          ),
-
-                          const Spacer(),
-                        ],
+                    // Horizontal list of topic chips
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          'Technology',
+                          'Business',
+                          'Programming',
+                          'Entertainment',
+                        ]
+                            .map(
+                              (e) => Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Toggle topic selection
+                                    if (selectedTopics.contains(e)) {
+                                      selectedTopics.remove(e);
+                                    } else {
+                                      selectedTopics.add(e);
+                                    }
+                                    setState(() {});
+                                  },
+                                  child: Chip(
+                                    label: Text(e),
+                                    color: selectedTopics.contains(e)
+                                        ? const WidgetStatePropertyAll(
+                                            AppPallete.gradient1)
+                                        : null,
+                                    side: selectedTopics.contains(e)
+                                        ? null
+                                        : const BorderSide(
+                                            color: AppPallete.borderColor),
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
                     ),
-                  );
-                },
-              );
-            },
-          ),
+
+                    const SizedBox(height: 10),
+
+                    // Blog title input
+                    BlogEditor(
+                      controller: blogTitleController,
+                      hintText: 'Blog Title',
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // Blog content input
+                    BlogEditor(
+                      controller: blogContentController,
+                      hintText: 'Blog Content',
+                      minLength: 4,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
