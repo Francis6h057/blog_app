@@ -1,5 +1,6 @@
 // Importing the Cubit that manages the app user's state (e.g., logged in or not)
 import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:blog_app/core/common/cubits/connection_cubit/connection_cubit_cubit.dart';
 import 'package:blog_app/core/network/connection_checker.dart';
 
 // Importing secret credentials (like Supabase keys and URLs)
@@ -81,6 +82,10 @@ Future<void> initDependencies() async {
       serviceLocator(),
     ),
   );
+
+  serviceLocator.registerFactory<ConnectionCubit>(() => ConnectionCubit(
+        serviceLocator(),
+      ));
 }
 
 // Private method to register authentication-related dependencies

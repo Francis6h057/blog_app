@@ -3,6 +3,7 @@
 
 // Importing Cubit for user authentication state management
 import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:blog_app/core/common/cubits/connection_cubit/connection_cubit_cubit.dart';
 
 // Importing the global app theme
 import 'package:blog_app/core/theme/theme.dart';
@@ -41,6 +42,9 @@ void main() async {
       // Providing AppUserCubit (for auth/user state)
       BlocProvider(
         create: (_) => serviceLocator<AppUserCubit>(),
+      ),
+      BlocProvider(
+        create: (_) => serviceLocator<ConnectionCubit>(),
       ),
       // Providing AuthBloc (for login/signup logic)
       BlocProvider(

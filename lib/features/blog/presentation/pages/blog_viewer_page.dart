@@ -1,16 +1,21 @@
+import 'package:blog_app/core/common/cubits/connection_cubit/connection_cubit_cubit.dart';
+import 'package:blog_app/core/common/cubits/connection_cubit/connection_cubit_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // Import the flutter_bloc package
 import 'package:blog_app/core/theme/app_pallete.dart';
 import 'package:blog_app/core/utils/calculate_reading_time.dart';
 import 'package:blog_app/core/utils/format_date.dart';
 import 'package:blog_app/features/blog/domain/entities/blog.dart';
-import 'package:flutter/material.dart';
 
 class BlogViewerPage extends StatelessWidget {
   final Blog blog;
+
   static route(blog) => MaterialPageRoute(
         builder: (context) => BlogViewerPage(
           blog: blog,
         ),
       );
+
   const BlogViewerPage({super.key, required this.blog});
 
   @override
@@ -57,9 +62,32 @@ class BlogViewerPage extends StatelessWidget {
                   const SizedBox(
                     height: 24,
                   ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network(blog.imageUrl),
+                  BlocBuilder<ConnectionCubit, InternetConnectionState>(
+                    builder: (context, state) {
+                      // If the device is connected, load the image from the network
+                      if (state.isConnected) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            blog.imageUrl,
+                            errorBuilder: (context, error, stackTrace) {
+                              // Handle the error (if any) and return a placeholder image
+                              return Image.asset(
+                                'assets/images/placeholder_image.png',
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        // If offline, show a placeholder image
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            'assets/images/offline_image_placeholder.png',
+                          ),
+                        );
+                      }
+                    },
                   ),
                   const SizedBox(
                     height: 24,
@@ -70,7 +98,7 @@ class BlogViewerPage extends StatelessWidget {
                   ),
                   const SizedBox(
                     height: 25,
-                  )
+                  ),
                 ],
               ),
             ),
