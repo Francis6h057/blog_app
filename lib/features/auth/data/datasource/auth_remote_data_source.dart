@@ -63,6 +63,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return UserModel.fromJson(
         response.user!.toJson(),
       ).copyWith(email: currentUserSession!.user.email);
+    } on AuthException catch (e) {
+      // Handle Supabase authentication errors
+      throw ServerException(e.message);
     } catch (e) {
       // Wrap and throw any error as a ServerException
       throw ServerException(e.toString());
@@ -95,6 +98,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return UserModel.fromJson(
         response.user!.toJson(),
       ).copyWith(email: currentUserSession!.user.email);
+    } on AuthException catch (e) {
+      // Handle Supabase authentication errors
+      throw ServerException(e.message);
     } catch (e) {
       // Wrap and throw any error as a ServerException
       throw ServerException(e.toString());

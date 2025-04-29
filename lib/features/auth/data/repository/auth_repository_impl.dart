@@ -7,8 +7,6 @@ import 'package:blog_app/core/common/entities/user.dart'; // User entity class
 import 'package:blog_app/features/auth/data/models/user_model.dart'; // User model class extending User entity
 import 'package:blog_app/features/auth/domain/repository/auth_repository.dart'; // Interface for authentication repository
 import 'package:fpdart/fpdart.dart'; // Functional programming library for Either type (to handle success/failure)
-import 'package:supabase_flutter/supabase_flutter.dart'
-    as sb; // Supabase library, aliased to prevent clash with 'User' class
 
 // Implementation of the AuthRepository interface
 class AuthRepositoryImpl implements AuthRepository {
@@ -115,9 +113,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Return the user if successful
       return right(user);
-    } on sb.AuthException catch (e) {
-      // Handle Supabase authentication errors
-      return left(Failure(e.message));
     } on ServerException catch (e) {
       // Handle custom server exceptions
       return left(Failure(e.message));

@@ -42,6 +42,8 @@ class BlogRemoteDatasourceImpl implements BlogRemoteDataSource {
       // Return the BlogModel instance after parsing the data.
       return BlogModel.fromJson(
           blogData.first); // Convert the first result to a BlogModel.
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       // If an error occurs, throw a custom ServerException with the error message.
       throw ServerException(e.toString());
@@ -69,6 +71,8 @@ class BlogRemoteDatasourceImpl implements BlogRemoteDataSource {
           .getPublicUrl(
             blog.id, // Use the blog's ID to get the URL for the uploaded image.
           );
+    } on StorageException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       // If an error occurs, throw a custom ServerException with the error message.
       throw ServerException(e.toString());
@@ -92,6 +96,8 @@ class BlogRemoteDatasourceImpl implements BlogRemoteDataSource {
             ),
           )
           .toList(); // Return a list of BlogModel instances with poster names.
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       // If an error occurs, throw a custom ServerException with the error message.
       throw ServerException(e.toString());
