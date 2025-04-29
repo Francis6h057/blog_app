@@ -5,6 +5,7 @@ import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart'; // Blo
 import 'package:blog_app/features/auth/presentation/pages/login_page.dart'; // Login page
 import 'package:blog_app/features/auth/presentation/widgets/auth_field.dart'; // Custom text field widget for authentication
 import 'package:blog_app/features/auth/presentation/widgets/auth_gradient_button.dart'; // Custom gradient button widget for authentication
+import 'package:blog_app/features/blog/presentation/pages/blog_page.dart';
 import 'package:flutter/material.dart'; // Flutter Material package
 import 'package:flutter_bloc/flutter_bloc.dart'; // Flutter Bloc package for state management
 
@@ -53,6 +54,12 @@ class _SignupPageState extends State<SignupPage> {
               showSnackBar(
                 context,
                 state.message,
+              );
+            } else if (state is AuthSuccess) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                BlogPage.route(),
+                (route) => false,
               );
             }
           },

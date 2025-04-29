@@ -83,7 +83,7 @@ class BlogViewerPage extends StatelessWidget {
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: Image.asset(
-                            'assets/images/offline_image_placeholder.png',
+                            'assets/images/placeholder_image.png',
                           ),
                         );
                       }
