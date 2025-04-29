@@ -1,5 +1,6 @@
 // Importing necessary packages and classes
 import 'package:blog_app/core/common/cubits/connection_cubit/connection_cubit_cubit.dart';
+import 'package:blog_app/core/constants/constants.dart';
 import 'package:blog_app/core/error/exceptions.dart'; // Custom exception class
 import 'package:blog_app/core/error/failures.dart'; // Custom failure class for error handling
 import 'package:blog_app/features/auth/data/datasource/auth_remote_data_source.dart'; // Data source for authentication
@@ -105,7 +106,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Check if there is no internet connection
       if (!connectionState.isConnected) {
-        return left(Failure('No internet Connection'));
+        return left(Failure(Constants.noConnectionErrorMessage));
       }
 
       // Attempt to get the user from the passed function

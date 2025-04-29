@@ -1,6 +1,7 @@
 // Importing necessary Dart and package libraries.
 import 'dart:io'; // Required for working with File type (used in image uploading)
 import 'package:blog_app/core/common/cubits/connection_cubit/connection_cubit_cubit.dart';
+import 'package:blog_app/core/constants/constants.dart';
 import 'package:blog_app/core/error/exceptions.dart'; // Custom exception class
 import 'package:blog_app/core/error/failures.dart'; // Custom failure class
 import 'package:blog_app/features/blog/data/datasources/blog_local_data_source.dart'; // Local data source for caching or offline use
@@ -44,7 +45,7 @@ class BlogRepositoryImpl implements BlogRepository {
 
       // Check for internet connection before proceeding
       if (!connectionState.isConnected) {
-        return left(Failure('No internet connection'));
+        return left(Failure(Constants.noConnectionErrorMessage));
       }
 
       // Create a new blog model with initial data (no image yet)
